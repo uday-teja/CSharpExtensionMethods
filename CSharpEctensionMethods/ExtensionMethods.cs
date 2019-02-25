@@ -34,11 +34,29 @@ namespace CSharpEctensionMethods
             return val != null && val.Length >= minCharLength;
         }
 
+        public static int GetWordCount(this string input)
+        {
+            if (input.Trim().Length == 0)
+                return 0;
+
+            return Regex.Split(input, @"\W+").Length;
+        }
+
         public static int ToInt32(this string value)
         {
             int number;
             Int32.TryParse(value, out number);
             return number;
+        }
+
+        public static bool IsInteger(this string s)
+        {
+            return !s.IsMatch("[^0-9-]") && s.IsMatch("^-[0-9]+$|^[0-9]+$");
+        }
+
+        public static bool IsMatch(this string s, string RegEx)
+        {
+            return new Regex(RegEx).IsMatch(s);
         }
 
         public static bool IsEmailAddress(this string email)
@@ -50,6 +68,33 @@ namespace CSharpEctensionMethods
             string pattern =
                 "^[a-zA-Z][\\w\\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\\w\\.-]*[a-zA-Z0-9]\\.[a-zA-Z][a-zA-Z\\.]*[a-zA-Z]$";
             return Regex.Match(email, pattern).Success;
+        }
+
+        public static bool IsValidUrl(this string url)
+        {
+            string strRegex = "^(https?://)"
+                + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?"
+                + @"(([0-9]{1,3}\.){3}[0-9]{1,3}"
+                + "|"
+                + @"([0-9a-z_!~*'()-]+\.)*"
+                + @"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]"
+                + @"(\.[a-z]{2,6})?)"
+                + "(:[0-9]{1,5})?"
+                + "((/?)|"
+                + "((/?)|"
+                + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+            return new Regex(strRegex).IsMatch(url);
+        }
+
+        public static string SwapCase(this string input)
+        {
+            return new string(input.Select(c => char.IsLetter(c) ? (char.IsUpper(c) ? char.ToLower(c) : char.ToUpper(c)) : c).ToArray());
+        }
+
+        public static T ToEnum<T>(this string value)
+           where T : struct
+        {
+            return (T)System.Enum.Parse(typeof(T), value, true);
         }
 
         public static bool ToBoolean(this string value)
