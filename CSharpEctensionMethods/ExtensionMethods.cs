@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CSharpEctensionMethods
 {
@@ -21,7 +22,7 @@ namespace CSharpEctensionMethods
 
         public static bool IsNullOrEmpty(this string val)
         {
-            return String.IsNullOrEmpty(val);
+            return string.IsNullOrEmpty(val);
         }
 
         public static bool IsMaxLength(this string val, int maxCharLength)
@@ -36,16 +37,12 @@ namespace CSharpEctensionMethods
 
         public static int GetWordCount(this string input)
         {
-            if (input.Trim().Length == 0)
-                return 0;
-
-            return Regex.Split(input, @"\W+").Length;
+            return input.Trim().Length == 0 ? 0 : Regex.Split(input, @"\W+").Length;
         }
 
         public static int ToInt32(this string value)
         {
-            int number;
-            Int32.TryParse(value, out number);
+            int.TryParse(value, out var number);
             return number;
         }
 
@@ -62,9 +59,7 @@ namespace CSharpEctensionMethods
         public static bool IsEmailAddress(this string email)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrWhiteSpace(email))
-            {
                 throw new ArgumentException("email");
-            }
             string pattern =
                 "^[a-zA-Z][\\w\\.-]*[a-zA-Z0-9]@[a-zA-Z0-9][\\w\\.-]*[a-zA-Z0-9]\\.[a-zA-Z][a-zA-Z\\.]*[a-zA-Z]$";
             return Regex.Match(email, pattern).Success;
@@ -89,12 +84,6 @@ namespace CSharpEctensionMethods
         public static string SwapCase(this string input)
         {
             return new string(input.Select(c => char.IsLetter(c) ? (char.IsUpper(c) ? char.ToLower(c) : char.ToUpper(c)) : c).ToArray());
-        }
-
-        public static T ToEnum<T>(this string value)
-           where T : struct
-        {
-            return (T)System.Enum.Parse(typeof(T), value, true);
         }
 
         public static bool ToBoolean(this string value)
@@ -124,6 +113,48 @@ namespace CSharpEctensionMethods
                 default:
                     throw new ArgumentException("Invalid boolean");
             }
+        }
+
+        public static bool Between(this DateTime dt, DateTime rangeBeg, DateTime rangeEnd)
+        {
+            return dt.Ticks >= rangeBeg.Ticks && dt.Ticks <= rangeEnd.Ticks;
+        }
+
+        public static bool IsMatchRegex(this string value, string pattern)
+        {
+            var regex = new Regex(pattern);
+            return (regex.IsMatch(value));
+        }
+
+        public static bool IsNullOrEmpty(this IList list)
+        {
+            return list == null || list.Count == 0;
+        }
+
+        public static string IfNullElse(this string input, string nullAlternateValue)
+        {
+            return (!string.IsNullOrWhiteSpace(input)) ? input : nullAlternateValue;
+        }
+
+        public static T Clone<T>(this object item)
+        {
+            if (item != null)
+            {
+                var formatter = new BinaryFormatter();
+                var stream = new MemoryStream();
+                formatter.Serialize(stream, item);
+                stream.Seek(0, SeekOrigin.Begin);
+                T result = (T)formatter.Deserialize(stream);
+                stream.Close();
+                return result;
+            }
+            else
+                return default(T);
+        }
+
+        public static bool Toggle(this bool value)
+        {
+            return !value;
         }
     }
 }
