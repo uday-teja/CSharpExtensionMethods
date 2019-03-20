@@ -136,20 +136,15 @@ namespace CSharpEctensionMethods
             return (!string.IsNullOrWhiteSpace(input)) ? input : nullAlternateValue;
         }
 
-        public static T Clone<T>(this object item)
+        public static T CloneObject<T>(this T other)
         {
-            if (item != null)
+            using (MemoryStream ms = new MemoryStream())
             {
-                var formatter = new BinaryFormatter();
-                var stream = new MemoryStream();
-                formatter.Serialize(stream, item);
-                stream.Seek(0, SeekOrigin.Begin);
-                T result = (T)formatter.Deserialize(stream);
-                stream.Close();
-                return result;
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, other);
+                ms.Position = 0;
+                return (T)formatter.Deserialize(ms);
             }
-            else
-                return default(T);
         }
 
         public static bool Toggle(this bool value)
