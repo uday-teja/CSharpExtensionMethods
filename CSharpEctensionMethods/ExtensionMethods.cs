@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
+using Microsoft.Win32;
 
 namespace CSharpEctensionMethods
 {
@@ -150,6 +152,38 @@ namespace CSharpEctensionMethods
         public static bool Toggle(this bool value)
         {
             return !value;
+        }
+
+        public static string Serialize<T>(this T dataToSerialize)
+        {
+            if (dataToSerialize == null) return null;
+
+            using (StringWriter stringwriter = new StringWriter())
+            {
+                var serializer = new XmlSerializer(typeof(T));
+                serializer.Serialize(stringwriter, dataToSerialize);
+                return stringwriter.ToString();
+            }
+        }
+
+        public static T DeserializeTo<T>(this string stringToDeserialize)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            if (string.IsNullOrEmpty(stringToDeserialize)) return default(T);
+            using (TextReader reader = new StringReader(stringToDeserialize))
+            {
+                return (T)serializer.Deserialize(reader);
+            }
+        }
+
+        //public static string GetFileExtention(this OpenFileDialog dialog)
+        //{
+        //    return Path.GetExtension(dialog.FileName);
+        //}
+
+        public static bool IsDateEqual(this DateTime date)
+        {
+            return (date.Day == DateTime.Today.Day && date.Month == DateTime.Today.Month && date.Year == DateTime.Today.Year);
         }
     }
 }
